@@ -45,26 +45,33 @@ var Game = (function () {
 				playerSnapshot.push(this.get_players()[i].get_properties());
 			}
 			var nextTileSnapshot = this.get_next_tile().get_properties();
+			var gameSnapshot = {turnNumber: this.get_turnNumber()};
 			
 			
-			return {board: boardSnapshot, players: playerSnapshot, nextTile: nextTileSnapshot}
+			return {game: gameSnapshot, board: boardSnapshot, players: playerSnapshot, nextTile: nextTileSnapshot}
 		};
 		this.load_game = function (json) {
-			console.log(json);
 			players = [];
 			Player.reset_nextId();
 			for (var i=0; i<json['players'].length; i++) {
 				newPlayer = Player.create_player_from_properties(json['players'][i]);
 				players.push(newPlayer);
 			}
-			console.log('players', players);
+			
 			newBoard = new Board(json['board']['size']);
 			for (var i=0; i<json['board']['tiles'].length; i++) {
 				newTile = Tile.create_tile_from_properties(json['board']['tiles'][i]['properties']);
 				newBoard.add_tile_to_board(newTile, json['board']['tiles'][i].x, json['board']['tiles'][i].y);
-				board = newBoard;
 			}
-			nextTile = Tile.create_tile_from_properties(json['nextTile']);
+			for (var i=0; i<json['board']['paths'].length; i++) {
+				var newPath = json['board']['paths'][i];
+				newBoard.add_path_to_board(newPath);
+			}
+			board = newBoard;
+			
+			this.set_next_tile(Tile.create_tile_from_properties(json['nextTile']));
+			
+			this.set_turnNumber(json['game']['turnNumber']);
 		};
 		this.create_board = function (max_size) {
 			var newBoard = new Board(max_size);
@@ -78,6 +85,9 @@ var Game = (function () {
 		};
 		this.set_next_tile = function (tile) {
 			nextTile = tile;
+		};
+		this.set_turnNumber = function (int) {
+			turnNumber = int;
 		};
 		this.create_new_player = function () {
 			var newPlayer = new Player;
@@ -132,7 +142,7 @@ var Game = (function () {
 				
 				
 				
-				console.log(scoringObject, scoringArray);
+				console.log(scoringObject);
 			}
 		};
 	};
@@ -510,6 +520,7 @@ var Board = (function () {
 			var boardSnapshot = {
 				size: size,
 				num_of_tiles: tiles.length,
+				'paths': paths,
 				'tiles': []
 			};
 			var counter = 0;
