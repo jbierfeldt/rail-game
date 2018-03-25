@@ -40,16 +40,9 @@ function arrayIsIdent(arr) {
 	});
 }
 
-function tile_id_in_array(tile, array_of_tiles) {
-	var i = array_of_tiles.length;
-	console.log(i);
-	while (i--) {
-		if (tile.get_id() == array_of_tiles[i].get_id()) {
-			return true;
-		} 
-	}
-	return false;
-};
+function isInArray(value, array) {
+  return array.indexOf(value) > -1;
+}
 
 function addCSSRule(sheet, selector, rules, index) {
 	if("insertRule" in sheet) {

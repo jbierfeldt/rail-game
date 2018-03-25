@@ -127,22 +127,25 @@ var Game = (function () {
 					if (scoringObject[key].length > longest) {
 						winnerArray = [];
 						longest = scoringObject[key].length;
-						winnerArray.push(key);
+						winnerArray.push(Number(key));
 					} else if (scoringObject[key].length == longest) {
-						winnerArray.push(key);
+						winnerArray.push(Number(key));
 					}
 				});
 				console.log('winners: ', winnerArray);
 				
 				for (var i = 0; i < playerList.length; i++) {
-					var pts = scoringObject[playerList[i].get_id()].length;
-					
+					playerId = playerList[i].get_id()
+					var pts = scoringObject[playerId].length;
+					if (isInArray(playerId, winnerArray)) {
+						var multiplier = 1 + (1/winnerArray.length);
+						console.log(multiplier);
+						pts = Math.round(pts * multiplier);
+					}
 					playerList[i].add_points(pts);
 				}
 				
-				
-				
-				console.log(scoringObject);
+				return winnersArray;
 			}
 		};
 	};
