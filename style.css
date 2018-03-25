@@ -1,0 +1,300 @@
+html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
+
+#game-info-left {
+
+}
+
+/* Styles for mobile */
+
+@media (min-width: 0px) {
+
+#game-wrapper {
+	position: relative;
+	height: 90%;
+	width: 90%;
+	margin: 0 auto;
+}
+
+#game-info-left {
+	position: relative;
+	float: left;
+	text-align: center;
+	padding: 10px;
+	background-color: rgba(0, 0, 0, 0.25);
+	z-index: 1;
+	height: 10%;
+	width: 100%;
+}
+
+#game-info-right {
+	position: relative;
+	float: left;
+	text-align: center;
+	padding: 10px;
+	background-color: rgba(0, 0, 0, 0.25);
+	z-index: 1;
+	height: 10%;
+	width: 100%;
+}
+
+#submit-box {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 50%;
+	background-color: rgba(46, 198, 81, 0.63);
+	pointer-events: all;
+	border-radius: 4px;
+	box-shadow: 
+		0 1px 2px #fff, /*bottom external highlight*/
+		0 -1px 1px #666, /*top external shadow*/ 
+		inset 0 -1px 1px rgba(0,0,0,0.5), /*bottom internal shadow*/ 
+		inset 0 1px 1px rgba(255,255,255,0.8); /*top internal highlight*/
+}
+
+#submit-box:disabled {
+	pointer-events: none;
+	background-color: rgba(0, 0, 0, 0.10);
+}
+
+#game-mask {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	height: 80%;
+	border: 10px solid rgba(106, 60, 60, 0.25);
+	float: left;
+	z-index: 0;
+}
+    
+}
+
+/* Styles for tablet/computer */
+
+@media (min-width: 750px) {
+	
+	#game-wrapper {
+	height: 80%;
+	width: 80%;
+	max-width: 960px;
+}
+
+#game-info-left {
+	height: 100%;
+	width: 10%;
+}
+
+#game-info-right {
+	height: 100%;
+	width: 10%;
+}
+
+#game-mask {
+	width: 70%;
+	height: 100%;
+}
+
+#game-grid {
+	position: absolute;
+}
+
+#submit-box {
+	width: 100%;
+	height: 10%;
+}
+    
+}
+
+#next-tile-label {
+	width: 15%;
+	display: inline-block;
+	justify-content: center;
+	align-items: center;
+}
+
+#next-tile-square {
+	display: inline-block;
+}
+
+#next-tile-container {
+	height: 64px;
+	width: 64px;
+	position: relative;
+	display: inline-block;
+}
+
+.tile-on-board {
+	z-index: -1; /* display beneath nextTile */
+}
+
+.game-pieces-layer {
+}
+
+.row {
+  color: green;
+  white-space: nowrap;
+}
+
+.grid {
+	pointer-events: none;
+	z-index: 2;
+}
+.square {
+	position: relative;
+	height: 64px;
+	width: 64px;
+    margin: 1px;
+    border: 2px solid black;
+    display: inline-block;
+    text-align: center;
+    
+    -webkit-user-select: none;
+        
+}
+
+.can--catch {
+	background-color: rgba(115, 211, 121, 0.63);
+}
+.cannot--catch {
+	background-color: rgba(225, 70, 70, 0.63);
+}
+
+@keyframes pulse {
+  0%, 100% {transform: scale(1,1);}
+  50% {transform: scale(1.3,1.3);}
+}
+
+.bad--catch {
+	background-color: rgba(237, 19, 19, 0.63);
+	animation: pulse 1s infinite;
+	animation-timing-function: ease-in-out;
+	animation-direction: alternate;
+}
+
+.good--catch {
+	background-color: rgba(46, 198, 81, 0.63);
+	animation: pulse 1s infinite;
+	animation-timing-function: ease-in-out;
+	animation-direction: alternate;
+}
+
+.center-point {
+  content: '';
+  position: absolute;
+  width: 15px;
+/*   border-radius: 50%; */
+  height: 15px;
+  top: calc(50% - 7.5px);
+  left: calc(50% - 7.5px);
+  background: dodgerblue;
+}
+
+.player-marker::before {
+  content: '';
+  position: absolute;
+  width: 15px;
+/*   border-radius: 50%; */
+  height: 15px;
+  bottom: 0;
+  left: 0;
+  background: red;
+}
+
+.completed::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 0; bottom: 0;
+  background: rgba(0,0,0,.35);
+}
+
+.n-g {
+    border-top-color: green;
+}
+.e-g {
+    border-right-color: green;
+}
+.s-g {
+    border-bottom-color: green;
+}
+.w-g {
+    border-left-color: green;
+}
+
+.n-s {
+    border-top-color: orange;
+}
+.e-s {
+    border-right-color: orange;
+}
+.s-s {
+    border-bottom-color: orange;
+}
+.w-s {
+    border-left-color: orange;
+}
+
+.gsgs, .sgsg, .sssg, .sgss, .gsss, .ssgs, .ggss, .sggs, .ssgg, .gssg, .sggg, .gsgg, .ggsg, .gggs {
+  width: 64px;
+  height: 64px;
+  background-image: url('./assets/images/tiles/roadTiles/road.png');
+  background-repeat: no-repeat;
+}
+
+.gsgs {
+  background-position: -256px -192px;
+}
+
+.sgsg {
+  background-position: -384px 0px;
+}
+
+.sssg {
+  background-position: -320px -64px;
+}
+
+.sgss {
+  background-position: -256px -128px;
+}
+
+.gsss {
+  background-position: -64px 0px;
+}
+
+.ssgs {
+background-position: -448px -64px;
+}
+
+.ggss {
+  background-position: -128px -128px;
+}
+
+.sggs {
+  background-position: -448px 0px;
+}
+
+.ssgg {
+  background-position: -384px -64px;
+}
+
+.gssg {
+  background-position: 0px 0px;
+}
+
+.sggg {
+  background-position: 0px -192px;	
+}
+
+.gsgg {
+  background-position: -320px 0px;
+}
+
+.ggsg {
+  background-position: -64px -128px;
+}
+
+.gggs {
+  background-position: -256px -64px;	
+}
+

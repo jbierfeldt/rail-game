@@ -1,0 +1,220 @@
+body {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    font-family: 'EB Garamond', serif;
+}
+
+canvas {
+    position: fixed;
+}
+
+.container {
+    width: 80%;
+    max-width: 960px;
+}
+
+
+
+
+/* Floating Container Styles */
+
+.floating-container {
+    margin-top: 3vh;
+    box-shadow: 7px 7px 10px #888888;
+    margin-bottom: 3vh;
+}
+
+.container ul li {
+	display: inline;
+}
+
+
+
+
+/* Header Styles */
+
+#nav-bar-container {
+	margin-top: 1rem;
+}
+
+#header-box {
+	background-color: rgba(241, 238, 220, 0.8);
+}
+
+#header-box .button {
+	background-color: rgba(250, 248, 236, 0.8);
+}
+
+#header {
+    text-align: center;
+}
+
+#header-title {
+	font-size: 4rem;
+}
+
+#header-sub-title {
+	font-size: 1.5rem;
+}
+
+
+
+
+/* Color Boxes Styles */
+
+.css-table {
+  display: table;
+  width: 100%;
+}
+.css-table .col {
+  display: table-cell;
+}
+
+.box-header {
+	padding-left: 1rem;
+	font-size: 2.5rem;
+}
+
+.box-content {
+	font-size: 1.75rem;
+	margin: 1rem 1rem 1rem 1rem;
+}
+
+.box-buttons .button {
+	text-align: left;
+	display: inline-block;
+	width: 48%;
+}
+
+#sound-column {
+	background-color: rgba(185, 227, 181, 0.8);
+}
+
+#sound-column .box-header {
+	background-color: #92D18B;
+}
+
+#sound-column .button {
+	background-color: rgba(223, 243, 221, 0.8);
+}
+
+#teaching-column {
+	background-color: rgba(179, 171, 209, 0.80);
+}
+
+#teaching-column .box-header {
+	background-color: #877CB0;
+}
+
+#teaching-column .button {
+	background-color: rgba(220, 216, 235, 0.8);
+}
+
+#academic-column {
+	background-color: rgba(255, 246, 204, 0.80);
+}
+
+#academic-column .box-header {
+	background-color: #FFEFAA;
+}
+
+#academic-column .button {
+	background-color: rgba(255, 252, 232, 0.8);
+}
+
+#web-column {
+	background-color: rgba(253, 202, 204, 0.80);
+}
+
+#web-column .box-header {
+	background-color: #FBA7AB;
+}
+
+#web-column .button {
+	background-color: rgba(255, 232, 233, 0.8);
+}
+
+
+
+
+/* Styles for mobile */
+
+@media (min-width: 0px) {
+	
+	.css-table {
+		width: 100%;
+	}
+	.css-table .col {
+		display: table-row;
+		width: 50%;
+	}
+	
+	.box-buttons .button {
+		text-align: center;
+		display: block;
+		width: 80%;
+		margin: 1rem auto;
+	}
+    
+    .floating-container {
+        margin-top: 0vh;
+        padding: 0px;
+    }
+    
+    #nav-bar {
+        width: 100%;
+    }
+    #nav-bar li {
+        display: block;
+        width: 100%;
+    }
+    #nav-bar li a {
+        width: 80%;
+        margin: 0 auto;
+    }
+    .column {
+        padding-top: 10px;
+        border-bottom: 1px solid #ccc;
+    }
+    
+}
+
+
+
+/* Styles for tablet/computer */
+
+@media (min-width: 550px) {
+	
+	.css-table .col {
+		display: table-cell;
+		width: 50%;
+	}
+	
+	.box-buttons .button {
+		text-align: left;
+		display: inline-block;
+		width: 48%;
+	}
+    
+    .floating-container {
+        margin-top: 3vh;
+    }
+    #nav-bar ul {
+    list-style: none;
+    margin: 2px auto;
+    }
+    #nav-bar li {
+    display: inline;
+    width: auto;
+    text-align: center;
+    }
+    #nav-bar li a {
+    width: auto;
+    }
+    .column {
+        padding-top: 0;
+        border-bottom: none;
+    }
+    
+}
