@@ -440,31 +440,6 @@ var Board = (function () {
 			
 			return boardSnapshot;
 		};
-		this.populateWithTiles = function () {
-			var cords = this.get_coordinates();
-			for (var i=0;i<cords.length;i++) {
-				for (var j=0;j<cords[i].length;j++) {
-					var tile = new Tile;
-					this.add_tile_to_board(tile, j, i); // build from left to right
-				}
-			}
-		};
-		this.print_tile_surroundings = function (x, y) {
-			try {
-				var tile = this.get_tile_surroundings(x,y)[0].get_id();
-			} catch(e) {
-				var tile = undefined;
-			}
-			var surroundings = [];
-			this.get_tile_surroundings(x,y)[1].forEach( function(i) {
-				if (i) {
-					surroundings.push(i.get_id());
-				} else {
-					surroundings.push(null);
-				}
-			});
-			console.log(tile + " : " + surroundings);
-		};
 	};
 	
 	// public static

@@ -414,10 +414,10 @@ var BoardView = (function () {
 			}
 		};
 		this.compute_score_for_completed_path = function (completed_path) {
+			// to be moved into the Game logic
 			var player = context.gameObj.get_playerCurrentTurn();
 			console.log(player.get_id());
 			player.add_points(completed_path.tiles.length);
-			// refresh();
 		};
 		this.add_next_tile_at_coord = function (x, y) {
 			var nextTile = context.gameObj.get_next_tile();
@@ -459,54 +459,6 @@ var BoardView = (function () {
 			var startPos = undefined;
 			var moveContainer = [];
 			var canSubmit = false;
-			
-			var dragValidPlacementAddClasses = function (draggableElement, dropzoneElement) {
-				var nextTile = context.gameObj.get_next_tile();
-				var drop_x = Number(dropzoneElement.dataset.x);
-				var drop_y = Number(dropzoneElement.dataset.y);
-				
-				// check tile placement's validity
-				if (context.gameObj.get_board().check_valid_placement(nextTile, drop_x, drop_y)) {
-					// feedback the possibility of a drop
-					dropzoneElement.classList.add('can--catch');
-					draggableElement.classList.add('drop--me');
-				} else {
-					dropzoneElement.classList.add('cannot--catch');
-				}
-			};
-			
-			var dropValidPlacementAddClasses = function (draggableElement, dropzoneElement) {
-				//console.log(draggableElement, dropzoneElement);
-				var nextTile = context.gameObj.get_next_tile();
-				var drop_x = Number(dropzoneElement.dataset.x);
-				var drop_y = Number(dropzoneElement.dataset.y);
-				
-				// clear present classes
-				dropzoneElement.classList.remove('bad--catch', 'good--catch');
-						
-				// check tile placement's validity
-				if (context.gameObj.get_board().check_valid_placement(nextTile, drop_x, drop_y)) {
-					// feedback the possibility of a drop
-					dropzoneElement.classList.add('good--catch');
-					context.elements.submitBox.classList.add("active");
-					context.elements.submitBox.disabled = false;
-					canSubmit = true;
-				} else {
-					dropzoneElement.classList.add('bad--catch');
-					context.elements.submitBox.classList.remove("active");
-					context.elements.submitBox.disabled = true;
-					canSubmit = false;
-				}
-			};
-			
-			var addToMoveContainer = function (object) {
-				// don't add object to moveContainer if it's already in
-				if (moveContainer.includes(event.target)) {
-					null
-				} else {
-					moveContainer.push(object);
-				}
-			};
 			
 			interact('.next-tile').draggable({
 				snap: {
@@ -580,6 +532,68 @@ var BoardView = (function () {
 				}
 			});
 			
+			interact('#'+context.elements.gameGrid.id).draggable({
+				// enable inertial throwing
+				inertia: true,
+				// keep the element within the area
+				restrict: {
+			   	  //restriction: {top: -(boardPxSize-250), left: -(boardPxSize-250), bottom: (boardPxSize+500), right: (boardPxSize)},
+				  endOnly: true,
+				  elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+				},
+				
+				onmove: dragMoveListenerWithMoveContainer,
+				onend: dragEndListener
+			});
+			
+			function dragValidPlacementAddClasses (draggableElement, dropzoneElement) {
+				var nextTile = context.gameObj.get_next_tile();
+				var drop_x = Number(dropzoneElement.dataset.x);
+				var drop_y = Number(dropzoneElement.dataset.y);
+				
+				// check tile placement's validity
+				if (context.gameObj.get_board().check_valid_placement(nextTile, drop_x, drop_y)) {
+					// feedback the possibility of a drop
+					dropzoneElement.classList.add('can--catch');
+					draggableElement.classList.add('drop--me');
+				} else {
+					dropzoneElement.classList.add('cannot--catch');
+				}
+			};
+			
+			function dropValidPlacementAddClasses (draggableElement, dropzoneElement) {
+				//console.log(draggableElement, dropzoneElement);
+				var nextTile = context.gameObj.get_next_tile();
+				var drop_x = Number(dropzoneElement.dataset.x);
+				var drop_y = Number(dropzoneElement.dataset.y);
+				
+				// clear present classes
+				dropzoneElement.classList.remove('bad--catch', 'good--catch');
+						
+				// check tile placement's validity
+				if (context.gameObj.get_board().check_valid_placement(nextTile, drop_x, drop_y)) {
+					// feedback the possibility of a drop
+					dropzoneElement.classList.add('good--catch');
+					context.elements.submitBox.classList.add("active");
+					context.elements.submitBox.disabled = false;
+					canSubmit = true;
+				} else {
+					dropzoneElement.classList.add('bad--catch');
+					context.elements.submitBox.classList.remove("active");
+					context.elements.submitBox.disabled = true;
+					canSubmit = false;
+				}
+			};
+			
+			function addToMoveContainer (object) {
+				// don't add object to moveContainer if it's already in
+				if (moveContainer.includes(event.target)) {
+					null
+				} else {
+					moveContainer.push(object);
+				}
+			};
+			
 			function dragMoveListener (event) {
 				var target = event.target,
 				// keep the dragged position in the data-x/data-y attributes
@@ -635,20 +649,6 @@ var BoardView = (function () {
 			function dragEndListener (event) {
 				event.target.classList.remove('getting--dragged');
 			};
-			
-			interact('#'+context.elements.gameGrid.id).draggable({
-				// enable inertial throwing
-				inertia: true,
-				// keep the element within the area
-				restrict: {
-			   	  //restriction: {top: -(boardPxSize-250), left: -(boardPxSize-250), bottom: (boardPxSize+500), right: (boardPxSize)},
-				  endOnly: true,
-				  elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-				},
-				
-				onmove: dragMoveListenerWithMoveContainer,
-				onend: dragEndListener
-			});
 		};
 		this.move_camera_to_start = function () {
 			var boardSize = options.boardSize;
