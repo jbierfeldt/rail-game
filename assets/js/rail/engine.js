@@ -112,7 +112,6 @@ var MainScene = (function () {
 		var context = {};
 		if (initial_context) {
 			var context = initial_context;
-// 			var boardObject = initial_context['boardObject'];
 		}
 		if (initial_options) {
 			var options = initial_options;
@@ -138,7 +137,9 @@ var MainScene = (function () {
 			console.log("entering Main Scene");
 		};
 		this.init = function () {
-			context.boardObj = context.gameObj.create_board(options['boardSize']);
+			// create board
+			context.gameObj.create_board(options['boardSize']);
+			Player.reset_nextId(); // Player_id always starts at 1
 			for (var i = 0; i < options.num_of_players; i++) {
 				var newPlayer = context.gameObj.create_new_player();
 				var newPlayerColor = getRandomRBG();
@@ -310,7 +311,8 @@ var BoardView = (function () {
 			(function() {
 				saveBox.addEventListener("click", function() {
 					console.log("saving game...");
-					localStorage.setItem('boardSave', JSON.stringify(context.gameObj.save_board()));
+					console.log(context.gameObj.save_game());
+					localStorage.setItem('saveGame', JSON.stringify(context.gameObj.save_game()));
 				});
 			})();
 			
@@ -323,9 +325,9 @@ var BoardView = (function () {
 			(function(that) {
 				loadBox.addEventListener("click", function() {
 					console.log("loading game...");
-					if (localStorage.boardSave) {
-						var load = localStorage.getItem('boardSave');
-						context.gameObj.load_board(JSON.parse(load));
+					if (localStorage.saveGame) {
+						var load = localStorage.getItem('saveGame');
+						context.gameObj.load_game(JSON.parse(load));
 						that.render();
 					}
 				});
@@ -407,17 +409,11 @@ var BoardView = (function () {
 				this.draw_completed_path(status); // maybe take out because redundant with next
 				context.gameObj.get_board().add_path_to_board(status);
 				console.log(context.gameObj.get_board().get_paths()); // show currently completed paths
-				this.compute_score_for_completed_path(status);
+				context.gameObj.calc_completed_path_points(status);
 				return true;
 			} else {
 				return false;
 			}
-		};
-		this.compute_score_for_completed_path = function (completed_path) {
-			// to be moved into the Game logic
-			var player = context.gameObj.get_playerCurrentTurn();
-			console.log(player.get_id());
-			player.add_points(completed_path.tiles.length);
 		};
 		this.add_next_tile_at_coord = function (x, y) {
 			var nextTile = context.gameObj.get_next_tile();
@@ -689,7 +685,8 @@ var BoardView = (function () {
 			}
 		};
 		this.render = function () {
-			console.log('rendering boardView')
+			console.log('rendering boardView');
+			console.log('context', context);
 			this.draw_grid_layer();
 			this.draw_completed_paths();
 			this.draw_next_tile_layer();

@@ -36,20 +36,35 @@ var Game = (function () {
 			//return playerCurrentTurn;
 			return players[turnNumber%players.length];
 		};
-		this.save_board = function () {
+		this.save_game = function () {
 			if (board !== undefined) {
 				var boardSnapshot = board.get_snapshot();
-				return boardSnapshot;
 			}
+			var playerSnapshot = [];
+			for (var i = 0; i < this.get_players().length; i++) {
+				playerSnapshot.push(this.get_players()[i].get_properties());
+			}
+			var nextTileSnapshot = this.get_next_tile().get_properties();
+			
+			
+			return {board: boardSnapshot, players: playerSnapshot, nextTile: nextTileSnapshot}
 		};
-		this.load_board = function (board_json) {
-			newBoard = new Board(board_json['size']);
-			for (var i=0; i<board_json['tiles'].length; i++) {
-				newTile = Tile.create_tile_from_properties(board_json['tiles'][i]['properties']);
-				newBoard.add_tile_to_board(newTile, board_json['tiles'][i].x, board_json['tiles'][i].y);
+		this.load_game = function (json) {
+			console.log(json);
+			players = [];
+			Player.reset_nextId();
+			for (var i=0; i<json['players'].length; i++) {
+				newPlayer = Player.create_player_from_properties(json['players'][i]);
+				players.push(newPlayer);
+			}
+			console.log('players', players);
+			newBoard = new Board(json['board']['size']);
+			for (var i=0; i<json['board']['tiles'].length; i++) {
+				newTile = Tile.create_tile_from_properties(json['board']['tiles'][i]['properties']);
+				newBoard.add_tile_to_board(newTile, json['board']['tiles'][i].x, json['board']['tiles'][i].y);
 				board = newBoard;
 			}
-			return newBoard;
+			nextTile = Tile.create_tile_from_properties(json['nextTile']);
 		};
 		this.create_board = function (max_size) {
 			var newBoard = new Board(max_size);
@@ -61,6 +76,9 @@ var Game = (function () {
 			nextTile = tile;
 			return tile;
 		};
+		this.set_next_tile = function (tile) {
+			nextTile = tile;
+		};
 		this.create_new_player = function () {
 			var newPlayer = new Player;
 			players.push(newPlayer);
@@ -68,6 +86,54 @@ var Game = (function () {
 		};
 		this.next_turn = function () {
 			turnNumber++;
+		};
+		
+		// calculators
+		
+		this.calc_completed_path_points = function (path) {
+			// calculates the value of a completed path
+			// for the various players
+			
+			// if completed path...
+			if (path.open_nodes.length === 0 && path.tiles.length > 0) {
+				var playerList = this.get_players();
+				var scoringObject = {};
+				for (var i = 0; i < playerList.length; i++) {
+					scoringObject[playerList[i].get_id()] = [];
+				}
+				
+				// sort tiles into arrays based on players
+				for (var i = 0; i < path.tiles.length; i++) {
+					if (path.tiles[i].get_playedBy()) {
+						scoringObject[path.tiles[i].get_playedBy()].push(path.tiles[i]);
+					}
+				}
+				
+				// winnersArray will contain the ids of the player(s)
+				// who have the most tiles in the completed path
+				var longest = -1;
+				var winnersArray = [];
+				Object.keys(scoringObject).forEach(function(key) {
+					if (scoringObject[key].length > longest) {
+						winnerArray = [];
+						longest = scoringObject[key].length;
+						winnerArray.push(key);
+					} else if (scoringObject[key].length == longest) {
+						winnerArray.push(key);
+					}
+				});
+				console.log('winners: ', winnerArray);
+				
+				for (var i = 0; i < playerList.length; i++) {
+					var pts = scoringObject[playerList[i].get_id()].length;
+					
+					playerList[i].add_points(pts);
+				}
+				
+				
+				
+				console.log(scoringObject, scoringArray);
+			}
 		};
 	};
 	
@@ -101,6 +167,16 @@ var Player = (function () {
 		this.get_colorRGBList = function () {
 			return colorRGBList;
 		};
+		this.get_properties = function () {
+			var properties_object = {
+				totalPoints: totalPoints,
+				colorRGBList: colorRGBList
+			};
+			return properties_object;
+		};
+		this.set_totalPoints = function (int) {
+			totalPoints = int;
+		};
 		this.set_colorRGBList = function (list) {
 			colorRGBList = list;
 		};
@@ -108,11 +184,22 @@ var Player = (function () {
 			totalPoints += points_amt;
 			return totalPoints;
 		};
+
 	};
 	
 	// public static
+	__constructor.create_player_from_properties = function (player_properties) {
+		console.log(player_properties);
+		var newPlayer = new Player;
+		newPlayer.set_totalPoints(player_properties.totalPoints);
+		newPlayer.set_colorRGBList(player_properties.colorRGBList);
+		return newPlayer;
+	};
 	__constructor.get_nextId = function () {
 		return nextId;
+	};
+	__constructor.reset_nextId = function () {
+		nextId = 1;
 	};
 	
 	return __constructor;
@@ -226,6 +313,9 @@ var Board = (function () {
 		};
 		
 		this.check_path_status = function (x, y) {
+			// function which checks the status the path on which
+			// the given coordinates lie
+			// returns path object  
 			var tiles_on_path = [];
 			var coords_on_path = [];
 			var open_nodes = [];
@@ -437,7 +527,6 @@ var Board = (function () {
 					}
 				}
 			}
-			
 			return boardSnapshot;
 		};
 	};
@@ -466,7 +555,7 @@ var Tile = (function () {
 		var edges = [];
 		var isEndPoint = false;
 		var type = undefined;
-		var playedBy = undefined; // player id of player that played the tile
+		var playedBy = undefined; // player object of player that played the tile
 		
 		// public (this instance only, created with new, access to private vars)
 		this.check_is_starting_tile = function() {
@@ -496,13 +585,14 @@ var Tile = (function () {
 			return playedBy;
 		};
 		this.get_properties = function () {
-			var properities_object = {
-				edges: this.get_edges(),
+			var properties_object = {
+				pieces: pieces,
+				edges: edges,
 				isEndPoint: isEndPoint,
 				type: type,
-				tile: this
+				playedBy: playedBy
 			};
-			return properities_object;
+			return properties_object;
 		};
 		this.set_edges = function (edge_array) {
 			edges = edge_array;
@@ -513,8 +603,8 @@ var Tile = (function () {
 		this.set_type = function (string) {
 			type = string;
 		};
-		this.set_playedBy = function (integer) {
-			playedBy = integer;
+		this.set_playedBy = function (int) {
+			playedBy = int;
 		};
 		this.add_piece = function (name) {
 			var piece = name;
@@ -535,6 +625,7 @@ var Tile = (function () {
 		newTile.set_edges(tile_properties.edges);
 		newTile.set_isEndPoint(tile_properties.isEndPoint);
 		newTile.set_type(tile_properties.type);
+		newTile.set_playedBy(tile_properties.playedBy);
 		return newTile;
 	};
 	// debug
