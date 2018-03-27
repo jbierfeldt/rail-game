@@ -44,6 +44,30 @@ function isInArray(value, array) {
   return array.indexOf(value) > -1;
 }
 
+var combinations = function (array)
+{
+    var result = [];
+
+    var loop = function (start,depth,prefix)
+    {
+        for(var i=start; i<array.length; i++)
+        {
+            var next = prefix+array[i];
+            if (depth > 0)
+                loop(i+1,depth-1,next);
+            else
+                result.push(next);
+        }
+    }
+
+    for(var i=0; i<array.length; i++)
+    {
+        loop(0,i,'');
+    }
+
+    return result;
+}
+
 function addCSSRule(sheet, selector, rules, index) {
 	if("insertRule" in sheet) {
 		sheet.insertRule(selector + "{" + rules + "}", index);

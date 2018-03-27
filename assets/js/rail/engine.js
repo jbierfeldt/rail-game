@@ -397,19 +397,28 @@ var BoardView = (function () {
 		this.draw_completed_path = function(path) {
 			for (var i = 0; i < path.coords.length; i++) {
 				var tile_element = document.querySelectorAll("[data-x='" + path.coords[i][0] + "'][data-y='" + path.coords[i][1] + "']")
-				tile_element[0].classList.add('player'+path.player_completed+'-completed', 'completed');
+				
+				// if multiple winners, gradient background on completion
+				if (path.winner.length > 1) {
+					var classString = 'players';
+					for (var j = 0; j < path.winner.length; j++) {
+						classString += (path.winner[j] + '-');
+					}
+					classString += 'completed';
+					tile_element[0].classList.add(classString, 'completed');
+				} else {
+					tile_element[0].classList.add('player'+path.winner[0]+'-completed', 'completed');
+				}
 			}
 		};
 		this.check_completed_path = function (x, y) {
 			var status = context.gameObj.get_board().check_path_status(x, y);
 			console.log(status);
 			if (status.open_nodes.length === 0 && status.tiles.length > 0) {
-				var player = context.gameObj.get_playerCurrentTurn();
-				status.player_completed = player.get_id();
+				status.winner = context.gameObj.calc_completed_path_points(status);
 				this.draw_completed_path(status); // maybe take out because redundant with next
 				context.gameObj.get_board().add_path_to_board(status);
-				console.log(context.gameObj.get_board().get_paths()); // show currently completed paths
-				context.gameObj.calc_completed_path_points(status);
+// 				console.log(context.gameObj.get_board().get_paths()); // show currently completed paths
 				return true;
 			} else {
 				return false;
@@ -674,15 +683,42 @@ var BoardView = (function () {
 			
 			context.style_sheet = style.sheet;
 			
-			for (var i = 0, playersList = context.gameObj.get_players(); i < playersList.length; i++) {
+			playersList = context.gameObj.get_players();
+						
+ 			var player_combinations = combinations(playersList.map(x => x.get_id()));
+ 			
+ 			for (var i = 0; i < player_combinations.length; i++) {
+	 			if (player_combinations[i].length > 1) {
+		 			var classString = '.players';
+		 			var styleString = 'background: repeating-linear-gradient(to left top, ';
+		 			for (var j = 0; j < player_combinations[i].length; j++) {
+			 			classString += (player_combinations[i][j] + '-');
+			 			styleString += "rgba("
+		 				+playersList[j].get_colorRGBList()[0]+","
+		 				+playersList[j].get_colorRGBList()[1]+","
+		 				+playersList[j].get_colorRGBList()[2]+",.6), "
+	 				}
+	 				classString += 'completed::after';
+	 				styleString = styleString.substring(0, styleString.length - 2);
+	 				styleString += ')';
+	 				console.log(classString, styleString);
+	 				addCSSRule(context.style_sheet, classString, styleString);
+	 			}
+ 			}
+			
+ 			console.log(player_combinations);
+			
+			for (var i = 0; i < playersList.length; i++) {
 				newPlayerColor = playersList[i].get_colorRGBList();
 				addCSSRule(context.style_sheet, ".player"+(playersList[i].get_id()),
 					"background-color: rgb("+newPlayerColor[0]+","+newPlayerColor[1]+","+newPlayerColor[2]+")");
 				addCSSRule(context.style_sheet, ".player"+(playersList[i].get_id()+"-completed::after"),
-					"background: rgba("+newPlayerColor[0]+","+newPlayerColor[1]+","+newPlayerColor[2]+", .45)", 1);
+					"background: rgba("+newPlayerColor[0]+","+newPlayerColor[1]+","+newPlayerColor[2]+", .6)", 1);
 				addCSSRule(context.style_sheet, ".player"+(playersList[i].get_id()+"-marker::before"),
 					"background: rgb("+newPlayerColor[0]+","+newPlayerColor[1]+","+newPlayerColor[2]+")", 1);
 			}
+			
+			
 		};
 		this.render = function () {
 			console.log('rendering boardView');

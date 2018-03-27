@@ -145,7 +145,7 @@ var Game = (function () {
 					playerList[i].add_points(pts);
 				}
 				
-				return winnersArray;
+				return winnerArray;
 			}
 		};
 	};
