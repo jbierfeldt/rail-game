@@ -1,2 +1,3 @@
-- refactor interact/draw code
-- update save/load board logic to preserve the player who placed the tile
+- allow tile to be placed back in the dock to allow for scrolling
+- reimplement board scrolling restrictions
+- don't allow tile to be placed in grid spots outside the mask (but how?)

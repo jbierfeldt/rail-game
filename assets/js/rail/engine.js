@@ -5,7 +5,7 @@ var game_options = {
 	currentScene: undefined,
 	boardSize: 18,
 	tileSize: 64, // size of tiles being used in px
-	num_of_players: 4
+	num_of_players: 2
 };
 
 var GameEngine = (function () {
