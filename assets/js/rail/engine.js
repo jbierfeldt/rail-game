@@ -379,6 +379,7 @@ var BoardView = (function () {
 					// if coordinate is not a tile,
 					// display empty grid			
 					} else {
+						context.elements.gridTiles.push(square);
 						square.classList.add('grid', 'dropzone');
 					}
 								
@@ -467,7 +468,7 @@ var BoardView = (function () {
 			
 			interact('.next-tile').draggable({
 				snap: {
-					targets: [startPos],
+					targets: [],
 					range: Infinity,
 					relativePoints: [{x: 0.5, y: 0.5 }],
 					endOnly: true
@@ -548,9 +549,9 @@ var BoardView = (function () {
 				},
 				
 				onmove: dragMoveListenerWithMoveContainer,
-				onend: dragEndListener
+				onend: gridDragEndListener
 			});
-			
+						
 			function dragValidPlacementAddClasses (draggableElement, dropzoneElement) {
 				var nextTile = context.gameObj.get_next_tile();
 				var drop_x = Number(dropzoneElement.dataset.x);
@@ -592,7 +593,7 @@ var BoardView = (function () {
 			
 			function addToMoveContainer (object) {
 				// don't add object to moveContainer if it's already in
-				if (moveContainer.includes(event.target)) {
+				if (moveContainer.includes(object)) {
 					null
 				} else {
 					moveContainer.push(object);
@@ -654,6 +655,53 @@ var BoardView = (function () {
 			function dragEndListener (event) {
 				event.target.classList.remove('getting--dragged');
 			};
+			
+			function gridDragEndListener (event) {
+				// set dropzone class only to elements in the bounds
+				// of the game mask
+				for (var i = 0; i<context.elements.gridTiles.length; i++) {
+					if(isGridElementinView(context.elements.gridTiles[i])) {
+						context.elements.gridTiles[i].classList.add('dropzone');
+					} else {
+						context.elements.gridTiles[i].classList.remove('dropzone');
+					}
+				}
+				event.target.classList.remove('getting--dragged');
+			};
+			
+			function isGridElementinView (grid_element) {
+				// function which checks if grid element is 
+				// in the bounds of the game mask. Used by 
+				// gridDragEndListener to check whether the element 
+				// should be set as a valid dropzone or not
+				var grid_rect = grid_element.getBoundingClientRect();
+				
+				var mask_rect = context.elements.gameMask.getBoundingClientRect();
+				
+				return (
+				    grid_rect.top >= mask_rect.top &&
+				    grid_rect.left >= mask_rect.left &&
+				    grid_rect.bottom <= mask_rect.bottom &&
+				    grid_rect.right <= mask_rect.right
+				);
+			};
+		};
+		this.isGridElementinView = function (grid_element) {
+			// function which checks if grid element is 
+			// in the bounds of the game mask. Used by 
+			// gridDragEndListener to check whether the element 
+			// should be set as a valid dropzone or not
+			var grid_rect = grid_element.getBoundingClientRect();
+			
+			var mask_rect = context.elements.gameMask.getBoundingClientRect();
+			console.log(grid_rect, mask_rect);
+			
+			return (
+			    grid_rect.top >= mask_rect.top &&
+			    grid_rect.left >= mask_rect.left &&
+			    grid_rect.bottom <= mask_rect.bottom &&
+			    grid_rect.right <= mask_rect.right
+			);
 		};
 		this.move_camera_to_start = function () {
 			var boardSize = options.boardSize;
@@ -701,13 +749,10 @@ var BoardView = (function () {
 	 				classString += 'completed::after';
 	 				styleString = styleString.substring(0, styleString.length - 2);
 	 				styleString += ')';
-	 				console.log(classString, styleString);
 	 				addCSSRule(context.style_sheet, classString, styleString);
 	 			}
  			}
-			
- 			console.log(player_combinations);
-			
+						
 			for (var i = 0; i < playersList.length; i++) {
 				newPlayerColor = playersList[i].get_colorRGBList();
 				addCSSRule(context.style_sheet, ".player"+(playersList[i].get_id()),
@@ -749,6 +794,9 @@ var BoardView = (function () {
 			context.elements.gameInfoRight.id = "game-info-right";
 			options.canvas.appendChild(context.elements.gameInfoRight);
 			
+			context.elements.gridTiles = [];
+
+			
 			this.draw_button_layer();
 			
 			this.init_interact_layer();
@@ -761,6 +809,7 @@ var BoardView = (function () {
 		};
 		
 		this.init();
+	
 	};
 	
 	// public static
