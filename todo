@@ -1,4 +1,5 @@
 - allow tile to be placed back in the dock to allow for scrolling
 - reimplement board scrolling restrictions
-- don't allow tile to be placed in grid spots outside the mask (but how?)
+- cause dropzone validation code to run initially... refactoring and DRY considering involved...
 - change it so that ties result in neither player getting a bonus? Calculating the bonus doesn't really do anything to change the score differential in a two-player game. (oh but it does for a 2+ person game, so that two players can team up against a clear winner... think more about this.)
+- should there be some kind of way to prevent 4-tile intersections?
