@@ -33,7 +33,6 @@ var Game = (function () {
 			return turnNumber;
 		};
 		this.get_playerCurrentTurn = function () {
-			//return playerCurrentTurn;
 			return players[turnNumber%players.length];
 		};
 		this.save_game = function () {
