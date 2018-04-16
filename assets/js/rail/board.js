@@ -4,7 +4,7 @@ var BoardView = (function () {
 	
 	// constructor
 	
-	var __constructor = function (initial_options, initial_context) {
+	var boardViewInstance = function (initial_options, initial_context) {
 		// private
 		var id = nextId++;
 		if (initial_context) {
@@ -80,7 +80,7 @@ var BoardView = (function () {
 		this.draw_next_tile = function (tileObj, tileElement) {
 			var nextTile = tileObj;
 			var edges = nextTile.get_edges();
-			var isEndPoint = nextTile.get_isEndPoint();
+			let tileType = nextTile.get_type();
 			var nextSquare = tileElement;
 			
 			nextSquare.classList = []; // clear current if updating
@@ -89,8 +89,8 @@ var BoardView = (function () {
 			nextSquare.classList.add(edges.join(''));
 			
 			// endPoints for factories, houses, and mines
-			if (nextTile.get_isEndPoint()) {
-				//
+			if (tileType) {
+				nextSquare.classList.add(tileType);
 			}
 		};
 		this.draw_next_tile_layer = function () {
@@ -176,7 +176,7 @@ var BoardView = (function () {
 		this.draw_grid_layer = function () {
 			var coords = context.gameObj.get_board().get_coordinates();
 			var grid_layer = context.elements.gameGrid;
-			
+						
 			// empty layer
 			grid_layer.innerHTML = '';
 			
@@ -198,15 +198,16 @@ var BoardView = (function () {
 					if (context.gameObj.get_board().check_coord_is_tile(j, i)) {
 						square.classList.add('tile-on-board');
 						
-						var t = coords[i][j];
+						let t = coords[i][j];
+						let tileType = t.get_type();
 						
 						// edges determine sprite selection
 						var edges = t.get_edges();
 						square.classList.add(edges.join(''));
 						
 						// endPoints for factories, houses, and mines
-						if (t.get_isEndPoint()) {
-							//
+						if (tileType) {
+							square.classList.add(tileType);
 						}
 						
 						// player-marker badges
@@ -236,23 +237,11 @@ var BoardView = (function () {
 		this.draw_completed_path = function(path) {
 			for (var i = 0; i < path.coords.length; i++) {
 				var tile_element = document.querySelectorAll("[data-x='" + path.coords[i][0] + "'][data-y='" + path.coords[i][1] + "']")
-				
-				// if multiple winners, gradient background on completion
-				if (path.winner.length > 1) {
-					var classString = 'players';
-					for (var j = 0; j < path.winner.length; j++) {
-						classString += (path.winner[j] + '-');
-					}
-					classString += 'completed';
-					tile_element[0].classList.add(classString, 'completed');
-				} else {
-					tile_element[0].classList.add('player'+path.winner[0]+'-completed', 'completed');
-				}
+				tile_element[0].classList.add('completed');
 			}
 		};
 		this.check_completed_path = function (x, y) {
 			var status = context.gameObj.get_board().check_path_status(x, y);
-			console.log(status);
 			if (status.open_nodes.length === 0 && status.tiles.length > 0) {
 				status.winner = context.gameObj.calc_completed_path_points(status);
 				this.draw_completed_path(status); // maybe take out because redundant with next
@@ -380,7 +369,6 @@ var BoardView = (function () {
 		};
 		this.render = function () {
 			console.log('rendering boardView');
-			console.log('context', context);
 			this.draw_grid_layer();
 			this.draw_completed_paths();
 			this.draw_next_tile_layer();
@@ -428,9 +416,9 @@ var BoardView = (function () {
 	};
 	
 	// public static
-	__constructor.get_nextId = function () {
+	boardViewInstance.get_nextId = function () {
 		return nextId;
 	};
 	
-	return __constructor;
+	return boardViewInstance;
 })();

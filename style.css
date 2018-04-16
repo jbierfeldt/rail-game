@@ -179,7 +179,7 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
 	animation-direction: alternate;
 }
 
-.center-point {
+.house::after, .mine::after, .factory::after {
   content: '';
   position: absolute;
   width: 15px;
@@ -188,6 +188,21 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
   top: calc(50% - 7.5px);
   left: calc(50% - 7.5px);
   background: dodgerblue;
+}
+
+.house::after {
+	content: 'H';
+	background: dodgerblue;
+}
+
+.mine::after {
+	content: 'M';
+	background: orange;
+}
+
+.factory::after {
+	content: 'F';
+	background: maroon;
 }
 
 .player-marker::before {
@@ -201,12 +216,14 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
   background: red;
 }
 
-.completed::after {
+.completed::before {
   content: "";
   position: absolute;
+  width: 100%;
+  height: 100%;
   left: 0; right: 0;
   top: 0; bottom: 0;
-  background: rgba(0,0,0,.35);
+  background: rgba(0,0,0,.35)!important;
 }
 
 .n-g {

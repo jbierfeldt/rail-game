@@ -14,7 +14,7 @@ var GameEngine = (function () {
 	
 	// constructor
 	
-	var __constructor = function (options) {
+	var gameEngineInstance = function (options) {
 		// private
 		var id = nextId++;
 		var viewStack = [];
@@ -92,11 +92,11 @@ var GameEngine = (function () {
 	};
 	
 	// public static
-	__constructor.get_nextId = function () {
+	gameEngineInstance.get_nextId = function () {
 		return nextId;
 	};
 	
-	return __constructor;
+	return gameEngineInstance;
 })();
 
 var MainScene = (function () {
@@ -105,7 +105,7 @@ var MainScene = (function () {
 	
 	// constructor
 	
-	var __constructor = function (initial_options, initial_context) {
+	var gameEngineInstance = function (initial_options, initial_context) {
 		// private
 		var id = nextId++;
 		var viewStack = [];
@@ -153,11 +153,11 @@ var MainScene = (function () {
 	};
 	
 	// public static
-	__constructor.get_nextId = function () {
+	gameEngineInstance.get_nextId = function () {
 		return nextId;
 	};
 	
-	return __constructor;
+	return gameEngineInstance;
 })();
 
 GAME = new GameEngine(game_options);
