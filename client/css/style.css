@@ -1,9 +1,5 @@
 html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
 
-#game-info-left {
-
-}
-
 /* Styles for mobile */
 
 @media (min-width: 0px) {
@@ -15,7 +11,7 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
 	margin: 0 auto;
 }
 
-#game-info-left {
+#bottom-info-bar {
 	position: relative;
 	float: left;
 	text-align: center;
@@ -26,7 +22,7 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
 	width: 100%;
 }
 
-#game-info-right {
+#top-info-bar {
 	position: relative;
 	float: left;
 	text-align: center;
@@ -37,7 +33,7 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
 	width: 100%;
 }
 
-#submit-box {
+#submit-button {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -46,14 +42,14 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
 	background-color: rgba(46, 198, 81, 0.63);
 	pointer-events: all;
 	border-radius: 4px;
-	box-shadow: 
+	box-shadow:
 		0 1px 2px #fff, /*bottom external highlight*/
-		0 -1px 1px #666, /*top external shadow*/ 
-		inset 0 -1px 1px rgba(0,0,0,0.5), /*bottom internal shadow*/ 
+		0 -1px 1px #666, /*top external shadow*/
+		inset 0 -1px 1px rgba(0,0,0,0.5), /*bottom internal shadow*/
 		inset 0 1px 1px rgba(255,255,255,0.8); /*top internal highlight*/
 }
 
-#submit-box:disabled {
+#submit-button:disabled {
 	pointer-events: none;
 	background-color: rgba(0, 0, 0, 0.10);
 }
@@ -67,44 +63,10 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
 	float: left;
 	z-index: 0;
 }
-    
+
 }
 
 /* Styles for tablet/computer */
-
-@media (min-width: 750px) {
-	
-	#game-wrapper {
-	height: 80%;
-	width: 80%;
-	max-width: 960px;
-}
-
-#game-info-left {
-	height: 100%;
-	width: 10%;
-}
-
-#game-info-right {
-	height: 100%;
-	width: 10%;
-}
-
-#game-mask {
-	width: 70%;
-	height: 100%;
-}
-
-#game-grid {
-	position: absolute;
-}
-
-#submit-box {
-	width: 100%;
-	height: 10%;
-}
-    
-}
 
 #next-tile-label {
 	width: 15%;
@@ -148,9 +110,9 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
     border: 2px solid black;
     display: inline-block;
     text-align: center;
-    
+
     -webkit-user-select: none;
-        
+
 }
 
 .can--catch {
@@ -255,7 +217,7 @@ html,body { height: 100%; width: 100%; margin: 0px; padding: 0px; }
 .gsgs, .sgsg, .sssg, .sgss, .gsss, .ssgs, .ggss, .sggs, .ssgg, .gssg, .sggg, .gsgg, .ggsg, .gggs {
   width: 64px;
   height: 64px;
-  background-image: url('./assets/images/tiles/roadTiles/road.png');
+  background-image: url('../img/tiles/roadTiles/road.png');
   background-repeat: no-repeat;
 }
 
@@ -300,7 +262,7 @@ background-position: -448px -64px;
 }
 
 .sggg {
-  background-position: 0px -192px;	
+  background-position: 0px -192px;
 }
 
 .gsgg {
@@ -312,6 +274,5 @@ background-position: -448px -64px;
 }
 
 .gggs {
-  background-position: -256px -64px;	
+  background-position: -256px -64px;
 }
-

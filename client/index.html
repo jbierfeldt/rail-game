@@ -5,7 +5,7 @@
   <!-- Basic Page Needs
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta charset="utf-8">
-  <title>Jackson Bierfeldt</title>
+  <title>Rail Game</title>
   <meta name="description" content="">
   <meta name="author" content="">
 
@@ -13,16 +13,12 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- FONT
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-<!--   <link href='https://fonts.googleapis.com/css?family=EB+Garamond' rel='stylesheet' type='text/css'> -->
-
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 
- <link rel="stylesheet" type="text/css" href="style.css">
-	  
-  
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+
+
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="icon" type="image/png" href="assets/images/favicon.png">
@@ -32,25 +28,24 @@
 <!-- Primary Page Layout
 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 <body>
-<div id="game-wrapper">
-</div>
-	
-<!-- Scripts for floating words -->
-<script src="assets/js/interact/interact.min.js"></script>
-<script src="assets/js/rail/desktop_input.js"></script>
-<script src="assets/js/rail/utilities.js"></script>
+  <div id="game-wrapper">
+    <div id="top-info-bar">
+      <div id="player-info-container">Player Info</div>
+      <div id="debug-button-container"></div>
+    </div>
+    <div id="game-mask">
+      <div id="game-paths-layer"></div>
+      <div id="game-grid-layer"></div>
+    </div>
+    <div id="bottom-info-bar">
+      <div id="next-tile-container">Next Tile</div>
+      <button id="submit-button" disabled>SUBMIT</div>
+    </div>
+  </div>
 
-<script src="assets/js/rail/classes/Tile.js"></script>
-<script src="assets/js/rail/classes/Board.js"></script>
-<script src="assets/js/rail/classes/Game.js"></script>
-<script src="assets/js/rail/classes/Player.js"></script>
 
-
-<script src="assets/js/rail/board.js"></script>
-<script src="assets/js/rail/engine.js"></script>
-
-  
-<!-- End Document
-–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <script data-main="js/req_config" src="js/lib/require.js"></script>
 </body>
 </html>
