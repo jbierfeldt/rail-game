@@ -86,97 +86,58 @@ define(['game/tile', 'game/path'], function(Tile, Path) {
     },
 
     getPathStatus: function(x, y) {
-      console.log("getting path status");
+      if (this.debug) console.log("getting path status");
       // function which checks the status the path on which
       // the given coordinates lie
       // returns path object
       const self = this;
-      const tilesOnPath = [];
-      const nodesOnPath = [];
+      const tilesOnPath = []; // used to prevent re-processing
+      const nodesOnPath = []; // nodes are
       const openNodes = [];
+      const deltaX = [0, 1, 0, -1]
+      const deltaY = [-1, 0, +1, 0]
 
       // recursive function which walks the path
       // skip_direction prevents the walk pointer from
       // going back down the same path twice
-      function walk(self, x, y, skipDirection) {
-        let currentNode = self.getTileAtCoord(x, y),
+      function walk(self, x, y) {
+        let currentTile = self.getTileAtCoord(x, y),
+            currentNode = {},
             nextNode = null;
+
         // register the current cord and info
-        tilesOnPath.push(currentNode);
-        nodesOnPath.push({
-          type:currentNode.type,
-          playedBy:currentNode.playedBy,
+        tilesOnPath.push(currentTile);
+        Object.assign(currentNode, {
+          id:currentTile.id,
+          type:currentTile.type,
+          playedBy:currentTile.playedBy,
           x:x,
-          y:y
+          y:y,
+          neighbors: []
         });
+        nodesOnPath.push(currentNode);
+
         for (let i = 0; i < 4; i++) { // check all four directions
           // if edge is a path and isn't the edge
           // of the previous tile
-          if (currentNode.edges[i] === 's' && i !== skipDirection) {
-            switch (i) {
-              // above
-              case 0:
-              nextNode = self.getTileAtCoord(x, y-1);
-              if (nextNode instanceof Tile) {
-                if (tilesOnPath.indexOf(nextNode) === -1) { //prevents loop-backs
-                  if (self.debug) console.log("walking up...");
-                  walk(self,x,y-1,2);
-                } else {
-                  continue;
-                }
-              } else if (nextNode === 0) {
-                openNodes.push([x,y]);
+          if (currentTile.edges[i] === 's') {
+            let newX = x + deltaX[i],
+            newY = y + deltaY[i];
+            nextNode = self.getTileAtCoord(newX, newY);
+            if (nextNode instanceof Tile) {
+              currentNode.neighbors.push(nextNode.id);
+              if (tilesOnPath.indexOf(nextNode) === -1) {
+                walk(self, newX, newY);
               }
-              break;
-              // right
-              case 1:
-              nextNode = self.getTileAtCoord(x+1, y);
-              if (nextNode instanceof Tile) {
-                if (tilesOnPath.indexOf(nextNode) === -1) { //prevents loop-backs
-                  if (self.debug) console.log("walking right...");
-                  walk(self,x+1,y,3);
-                } else {
-                  continue;
-                }
-              } else if (nextNode === 0) {
-                openNodes.push([x,y]);
-              }
-              break;
-              // below
-              case 2:
-              nextNode = self.getTileAtCoord(x, y+1);
-              if (nextNode instanceof Tile) {
-                if (tilesOnPath.indexOf(nextNode) === -1) { //prevents loop-backs
-                  if (self.debug) console.log("walking down...");
-                  walk(self,x,y+1,0);
-                } else {
-                  continue;
-                }
-              } else if (nextNode === 0) {
-                openNodes.push([x,y]);
-              }
-              break;
-              // left
-              case 3:
-              nextNode = self.getTileAtCoord(x-1, y);
-              if (nextNode instanceof Tile) {
-                if (tilesOnPath.indexOf(nextNode) === -1) { //prevents loop-backs
-                  if (self.debug) console.log("walking left...");
-                  walk(self,x-1,y,1);
-                } else {
-                  continue;
-                }
-              } else if (nextNode === 0) {
-                openNodes.push([x,y]);
-              }
-              break;
+            } else if (nextNode === 0) {
+              openNodes.push(currentNode);
             }
           }
         }
       };
 
       // start walking
-      walk(self,x,y,undefined);
+      walk(self,x,y);
 
       return {openNodes, nodesOnPath};
     },
@@ -230,7 +191,7 @@ define(['game/tile', 'game/path'], function(Tile, Path) {
         this.coordinates[y][x] = tile;
         this.tiles.push(tile);
         const pathStatus = this.getPathStatus(x, y);
-        console.log(pathStatus);
+        if (this.debug) console.log(pathStatus);
         if (pathStatus.openNodes.length == 0 && pathStatus.nodesOnPath.length > 0) {
           this.addPathToBoard(pathStatus);
         };

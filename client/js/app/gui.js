@@ -35,7 +35,7 @@ define(['app/input'], function(InputManager) {
 					}
 				},
 				'Load Game': function() {
-					console.log("loading game...");
+					if (this.debug) console.log("loading game...");
 					let json = JSON.parse(localStorage.getItem('saveGame'));
 					this.game.loadGame(json);
 					this.drawGrid();
@@ -82,7 +82,7 @@ define(['app/input'], function(InputManager) {
 		},
 
 		onSubmit: function() {
-			console.log("submitted!");
+			if (this.debug) console.log("submitted!");
 			if (this.nextTileElement.attr('data-grid_id')) {
 				const dropzone = $("#"+this.nextTileElement.attr('data-grid_id'));
 				const drop_x = Number(dropzone.attr('data-x'));
@@ -262,14 +262,14 @@ define(['app/input'], function(InputManager) {
     updateButtons: function() {
 			const self = this;
 
-			if(this.debug) {
+			// if(this.debug) {
 				// clear
 				$(this.debugButtonContainer).empty();
 				// add buttons for each of the defined debug buttons
 				Object.keys(this.debugButtons).forEach(function (name) {
 					self.drawButton(name, self.debugButtons[name]);
 				});
-			}
+			// }
     },
 
 		// abstract function for running the validation function

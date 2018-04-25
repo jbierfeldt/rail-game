@@ -5,40 +5,41 @@ define(['game/game', 'app/gui', 'game/tile'], function(Game, GUI, Tile) {
 
 	const App = Class.extend({
 
-	    init: function() {
-	        console.log("started App");
-					this.debug = true;
+		init: function() {
+			this.debug = true;
+			if (this.debug) console.log("started App");
 
-					this.self = this;
-					this.game = null;
-					this.gui = null;
 
-					this.options = null;
-	    },
+			this.self = this;
+			this.game = null;
+			this.gui = null;
 
-			initGame: function(options) {
-				// initializes the Game
+			this.options = null;
+		},
 
-				var options = {};
+		initGame: function(options) {
+			// initializes the Game
 
-		    // set dynamically in app
-		    options.playerNum = 3;
-		    options.playerColors = {
-		      0: 'red',
-		      1: 'orange',
-		      2: 'blue'
-		    };
-		    options.boardSize = 15;
-				options.maximumTurns = 50;
+			var options = {};
 
-				this.game = new Game(this.self);
-				this.game.setup(options);
-				this.game.board.addStartTile();
+			// set dynamically in app
+			options.playerNum = 3;
+			options.playerColors = {
+				0: 'red',
+				1: 'orange',
+				2: 'blue'
+			};
+			options.boardSize = 15;
+			options.maximumTurns = 50;
 
-				this.gui = new GUI(this.self, this.game);
-				this.gui.onStartOfTurn();
-				this.gui.updateButtons();
-			}
+			this.game = new Game(this.self);
+			this.game.setup(options);
+			this.game.board.addStartTile();
+
+			this.gui = new GUI(this.self, this.game);
+			this.gui.onStartOfTurn();
+			this.gui.updateButtons();
+		}
 
 	});
 	return App;

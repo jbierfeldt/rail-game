@@ -62,7 +62,6 @@ function addCSSRule(sheet, selector, rules, index) {
   else if("addRule" in sheet) {
     sheet.addRule(selector, rules, index);
   }
-  console.log("adding rule");
 }
 
 function getRandomInt(min, max) {

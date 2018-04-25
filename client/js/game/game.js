@@ -1,4 +1,4 @@
-define(['game/board', 'game/player', 'game/tile'], function(Board, Player, Tile) {
+define(['game/board', 'game/player', 'game/tile', 'lib/pathfinding'], function(Board, Player, Tile, path) {
 
 	// private static
 	let nextId = 1;
@@ -103,118 +103,149 @@ define(['game/board', 'game/player', 'game/tile'], function(Board, Player, Tile)
 			const typeChoices = [undefined, undefined, undefined, undefined, undefined,
 				'factory', 'house', 'mine']; // implement weighted choice later
 
-			const type = choose(typeChoices);
+				const type = choose(typeChoices);
 
-			// validate edges
-			let validEdges = false;
-			while (validEdges === false) {
-				var edges = [
-					choose(edgeChoices),
-					choose(edgeChoices),
-					choose(edgeChoices),
-					choose(edgeChoices)
-				];
-				// if all four edges are the same, redo
-				// all identical edges could cause impossible moves
-				if (arrayIsIdent(edges)) {
-					continue;
-				} else {
-					validEdges = true;
+				// validate edges
+				let validEdges = false;
+				while (validEdges === false) {
+					var edges = [
+						choose(edgeChoices),
+						choose(edgeChoices),
+						choose(edgeChoices),
+						choose(edgeChoices)
+					];
+					// if all four edges are the same, redo
+					// all identical edges could cause impossible moves
+					if (arrayIsIdent(edges)) {
+						continue;
+					} else {
+						validEdges = true;
+					}
 				}
-			}
 
-			const newTile = new Tile(type, edges);
-			return newTile;
-		},
+				const newTile = new Tile(type, edges);
+				return newTile;
+			},
 
-		createNextTile: function() {
-			this.nextTile = this.createRandomTile();
-		},
+			createNextTile: function() {
+				this.nextTile = this.createRandomTile();
+			},
 
-		createNewPlayer: function(color, points) {
-			const newPlayer = new Player(color, points || 0);
-			this.players.push(newPlayer);
-		},
+			createNewPlayer: function(color, points) {
+				const newPlayer = new Player(color, points || 0);
+				this.players.push(newPlayer);
+			},
 
-		calcCompletedPathScore: function(path) {
-			// calculates the value of a completed path
-			// for the various players
-			if (this.debug) console.log("Calculating Path Score...", path);
+			calcCompletedPathScore: function(path) {
+				const self = this;
+				// calculates the value of a completed path
+				// for the various players
+				if (this.debug) console.log("Calculating Path Score...", path);
 
-			const scoringObject = {};
+				const scoringObject = {};
+				const specialTiles = {};
 
-			// create 'bucket' for each player
-			for (let i = 0; i < this.players.length; i++) {
-				scoringObject[this.players[i].id] = {
-					nodes: []
+				for (let i = 0; i < path.nodesOnPath.length; i++) {
+					// add initial value of tile for score
+					path.nodesOnPath[i].value = 1;
+					// if tile has a type, push it to specialTiles for
+					// later score calculating
+					if (path.nodesOnPath[i].type) {
+						if (!specialTiles[path.nodesOnPath[i].type]) {
+							specialTiles[path.nodesOnPath[i].type] = [];
+						}
+						path.nodesOnPath[i].loaded = false;
+						path.nodesOnPath[i].supplying = false;
+						specialTiles[path.nodesOnPath[i].type].push(path.nodesOnPath[i]);
+					}
+				}
+
+				const calcSpecialTileBonus = function(specialTiles, startType, endType, bonusAmount, mustBeLoaded) {
+					// if there is at least one startType on path...
+					if (specialTiles[startType] && specialTiles[endType]) {
+						// for each of startType...
+						for (let i = 0; i < specialTiles[startType].length; i++) {
+							// if startType must be loaded, and isn't, then return
+							if (mustBeLoaded && !specialTiles[startType][i].loaded) {
+								if (self.debug) console.log(`${startType} has no suppliers.`);
+								return;
+							}
+							// get dijkstraTree which contains costs to each node on Path
+							let startId = specialTiles[startType][i].id;
+							let dijkstraTree = getDijkstraTree(path.nodesOnPath, startId);
+							// for each of endType...
+							for (let j = 0; j < specialTiles[endType].length; j++) {
+								// get dijkstraScore which contains optimalPath from
+								// startType to endType
+								let finishId = specialTiles[endType][j].id;
+								if (self.debug) console.log(`${startType}:${startId} to ${endType}:${finishId}`);
+								let dijkstraScore = getOptimalPathFromTree(dijkstraTree, finishId);
+								// check validity
+								// if greater than 2000, then invalid
+								if (dijkstraScore.targetScore < 2000) {
+									if (self.debug) console.log("valid", dijkstraScore.targetScore);
+									// mark endType as 'loaded' for use in further calculation
+									specialTiles[endType][j].loaded = true;
+									specialTiles[startType][i].supplying = true;
+									// add a bonus to the specialTile equal to the length of the
+									// path between the startType and endType
+									specialTiles[startType][i].value += (dijkstraScore.targetScore - 1000) * bonusAmount;
+								} else {
+									if (self.debug) console.log("invalid - Path passes through another special Node.", dijkstraScore.targetScore)
+								}
+							}
+						}
+					} else {
+						if (self.debug) console.log("At least one type of endpoint is missing.");
+					}
 				};
-			}
 
-			// sort path nodes into buckets
-			for (let i = 0; i < path.nodesOnPath.length; i++) {
-				if (path.nodesOnPath[i].playedBy) {
-					scoringObject[path.nodesOnPath[i].playedBy].nodes.push(path.nodesOnPath[i]);
+				// mine->factory, bonus: 1, mustBeLoaded = false
+				calcSpecialTileBonus(specialTiles, 'mine', 'factory', 1, false);
+				// mine->factory, bonus: 2, mustBeLoaded = true
+				calcSpecialTileBonus(specialTiles, 'factory', 'house', 2, true);
+
+				if (this.debug) console.log(specialTiles, path);
+
+				// for each node on the path that belongs to player,
+				// give that player the value of the tile
+				for (let i = 0; i < path.nodesOnPath.length; i++) {
+					if (path.nodesOnPath[i].playedBy) {
+						this.players[path.nodesOnPath[i].playedBy - 1].addPoints(path.nodesOnPath[i].value);
+					}
 				}
-			}
+			},
 
-			// winnersArray will contain the ids of the player(s)
-			// who have the most tiles in the completed path
-			let longest = -1;
-			let winnersArray = [];
-			Object.keys(scoringObject).forEach(function(key) {
-				if (scoringObject[key].nodes.length > longest) {
-					winnerArray = []; // clear array
-					longest = scoringObject[key].nodes.length; // current length is new longest
-					winnerArray.push(Number(key));
-				} else if (scoringObject[key].nodes.length == longest) {
-					winnerArray.push(Number(key));
+			endOfTurn: function() {
+				if (this.turnNumber == this.maximumTurns) {
+					this.endGame();
 				}
-			});
-			if (this.debug) console.log(scoringObject, 'winners', winnerArray);
+				// score stuff?
+			},
 
-			// give players points based on their scoringObject
-			// with a different multiplier for the winner
-			for (let i = 0; i < this.players.length; i++) {
-				let points = scoringObject[this.players[i].id].nodes.length;
-				if (isInArray(this.players[i].id, winnerArray)) {
-					const multiplier = 1 + (1/winnerArray.length);
-					if (this.debug) console.log('multiplier for winner(s): ', multiplier);
-					points = Math.round(points * multiplier);
+			startOfTurn: function() {
+				this.turnNumber++;
+				this.createNextTile();
+				if (this.debug) console.log("Current Turn: ", this.turnNumber);
+			},
+
+			endGame: function() {
+				let highest = -1;
+				let winners = [];
+				for (let i = 0; i < this.players.length; i++) {
+					if (this.players[i].points > highest) {
+						winners = [];
+						winners.push(this.players[i]);
+						highest = this.players[i].points;
+					} else if (this.players[i].points == highest) {
+						winners.push(this.players[i]);
+					}
 				}
-				this.players[i].addPoints(points);
+				console.log(winners);
+				alert("Game Over! Winner(s) are:");
 			}
-		},
 
-		endOfTurn: function() {
-			if (this.turnNumber == this.maximumTurns) {
-				this.endGame();
-			}
-			// score stuff?
-		},
+		});
 
-		startOfTurn: function() {
-			this.turnNumber++;
-			this.createNextTile();
-			if (this.debug) console.log("Current Turn: ", this.turnNumber);
-		},
-
-		endGame: function() {
-			let highest = -1;
-			let winners = [];
-			for (let i = 0; i < this.players.length; i++) {
-				if (this.players[i].points > highest) {
-					winners = [];
-					winners.push(this.players[i]);
-					highest = this.players[i].points;
-				} else if (this.players[i].points == highest) {
-					winners.push(this.players[i]);
-				}
-			}
-			console.log(winners);
-			alert("Game Over! Winner(s) are:");
-		}
-
+		return Game;
 	});
-
-	return Game;
-});
