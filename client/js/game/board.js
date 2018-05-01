@@ -210,7 +210,7 @@ define(['game/tile', 'game/path'], function(Tile, Path) {
 
     addPathToBoard: function(path) {
       if (this.debug) console.log("adding path to board", path);
-      this.game.calcCompletedPathScore(path);
+      this.game.calcCompletedPathScore(path.nodesOnPath);
       this.paths.push(path);
     },
 

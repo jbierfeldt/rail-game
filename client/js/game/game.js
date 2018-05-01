@@ -136,32 +136,33 @@ define(['game/board', 'game/player', 'game/tile', 'lib/pathfinding'], function(B
 				this.players.push(newPlayer);
 			},
 
-			calcCompletedPathScore: function(path) {
+			calcCompletedPathScore: function(nodesOnPath) {
 				const self = this;
 				// calculates the value of a completed path
 				// for the various players
-				if (this.debug) console.log("Calculating Path Score...", path);
+				if (this.debug) console.log("Calculating Path Score...", nodesOnPath);
 
-				const scoringObject = {};
+				// used to keep track of which special tiles,
+				// if any, are on the path
 				const specialTiles = {};
 
-				for (let i = 0; i < path.nodesOnPath.length; i++) {
+				for (let i = 0; i < nodesOnPath.length; i++) {
 					// add initial value of tile for score
-					path.nodesOnPath[i].value = 1;
+					nodesOnPath[i].value = 1;
 					// if tile has a type, push it to specialTiles for
 					// later score calculating
-					if (path.nodesOnPath[i].type) {
-						if (!specialTiles[path.nodesOnPath[i].type]) {
-							specialTiles[path.nodesOnPath[i].type] = [];
+					if (nodesOnPath[i].type) {
+						if (!specialTiles[nodesOnPath[i].type]) {
+							specialTiles[nodesOnPath[i].type] = [];
 						}
-						path.nodesOnPath[i].loaded = false;
-						path.nodesOnPath[i].supplying = false;
-						specialTiles[path.nodesOnPath[i].type].push(path.nodesOnPath[i]);
+						nodesOnPath[i].loaded = false;
+						nodesOnPath[i].supplying = false;
+						specialTiles[nodesOnPath[i].type].push(nodesOnPath[i]);
 					}
 				}
 
 				const calcSpecialTileBonus = function(specialTiles, startType, endType, bonusAmount, mustBeLoaded) {
-					// if there is at least one startType on path...
+					// if there is at least one startType and one endType on path...
 					if (specialTiles[startType] && specialTiles[endType]) {
 						// for each of startType...
 						for (let i = 0; i < specialTiles[startType].length; i++) {
@@ -172,7 +173,7 @@ define(['game/board', 'game/player', 'game/tile', 'lib/pathfinding'], function(B
 							}
 							// get dijkstraTree which contains costs to each node on Path
 							let startId = specialTiles[startType][i].id;
-							let dijkstraTree = getDijkstraTree(path.nodesOnPath, startId);
+							let dijkstraTree = getDijkstraTree(nodesOnPath, startId);
 							// for each of endType...
 							for (let j = 0; j < specialTiles[endType].length; j++) {
 								// get dijkstraScore which contains optimalPath from
@@ -202,16 +203,16 @@ define(['game/board', 'game/player', 'game/tile', 'lib/pathfinding'], function(B
 
 				// mine->factory, bonus: 1, mustBeLoaded = false
 				calcSpecialTileBonus(specialTiles, 'mine', 'factory', 1, false);
-				// mine->factory, bonus: 2, mustBeLoaded = true
+				// factory->house, bonus: 2, mustBeLoaded = true
 				calcSpecialTileBonus(specialTiles, 'factory', 'house', 2, true);
 
-				if (this.debug) console.log(specialTiles, path);
+				if (this.debug) console.log(specialTiles, nodesOnPath);
 
 				// for each node on the path that belongs to player,
 				// give that player the value of the tile
-				for (let i = 0; i < path.nodesOnPath.length; i++) {
-					if (path.nodesOnPath[i].playedBy) {
-						this.players[path.nodesOnPath[i].playedBy - 1].addPoints(path.nodesOnPath[i].value);
+				for (let i = 0; i < nodesOnPath.length; i++) {
+					if (nodesOnPath[i].playedBy) {
+						this.players[nodesOnPath[i].playedBy - 1].addPoints(nodesOnPath[i].value);
 					}
 				}
 			},

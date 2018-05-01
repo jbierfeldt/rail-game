@@ -1,47 +1,40 @@
 const getDijkstraTree = function(path, startId) {
-  // build a tree of costs and parents from startId
-  // to every other node on the path
 
-  // create initial objects and lists
-  const costs = {};
+  // get start node
+  let start = getNodeById(path, startId);
+
+  // get initial costs of neighbors
+  const costs = getCostsOfNeighbors(path, start.neighbors);
+  costs[start.id] = -1;
   const parents = {};
-  const processed = [];
+  const processed = [String(start.id)];
 
-  // set start cost = 0
-  costs[startId] = 0;
-
-  // set tentative cost for all other nodes to Infinity
-  for (let i = 0; i < path.length; i++) {
-    if (path[i].id != startId) {
-      costs[path[i].id] = Infinity;
-    }
+  for (let i = 0; i < start.neighbors.length; i++) {
+    parents[start.neighbors[i]] = start.id;
   }
 
-  // currentNode = start node
-  let currentNode = getLowestNode(costs, processed);
-
-  // as long as there are nodes which are not in processed...
-  while (currentNode) {
-    let cost = costs[currentNode]; // cost of current node
-    let children = getNodeById(path, currentNode).neighbors;
-    let childrenCosts = getCostsOfNeighbors(path, children); // 1 or 1001
+  let node = getLowestNode(costs, processed);
+  while (node) {
+    let cost = costs[node];
+    let children = getNodeById(path, node).neighbors;
+    let childrenCosts = getCostsOfNeighbors(path, children);
 
     for (let n in childrenCosts) {
-      let newCost = cost + childrenCosts[n]; // cost of current node + travel
+      let newCost = cost + childrenCosts[n];
+      if (!costs[n]) {
+        costs[n] = newCost;
+        parents[n] = Number(node);
+      }
       if (costs[n] > newCost) {
         costs[n] = newCost;
-        parents[n] = currentNode;
+        parents[n] = Number(node);
       }
     }
 
-    // add currentNode to processed list after processing
-    processed.push(currentNode);
-
-    // get lowest, unprocessed node
-    currentNode = getLowestNode(costs, processed);
+    processed.push(node);
+    node = getLowestNode(costs, processed);
   }
 
-  // return path, costs, and parents for use with getOptimalPathFromTree
   return {path, costs, parents};
 };
 
@@ -62,12 +55,12 @@ const getOptimalPathFromTree = function(tree, finishId) {
   const targetScore = tree.costs[finishId];
 
   return {optimalPath, targetScore};
-};
+}
 
 const getLowestNode = function(costs, processed) {
   return Object.keys(costs).reduce((lowest, node) => {
     if (lowest === null || costs[node] < costs[lowest]) {
-      if (!processed.includes(node) && costs[node] < 1000) { // costs[node] just makes it more efficient;
+      if (!processed.includes(node)) {
         lowest = node;
       }
     }
