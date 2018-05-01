@@ -1,3 +1,9 @@
+---
+layout: "post"
+title: "Implementing Dijkstra"
+date: "2018-05-01 14:54"
+---
+
 # Using Dijkstra's Algorithm for Score Calculation in a Tile-based Game
 
 Recently, I've been building a multiplayer tile-laying game inspired by games like [Carcassonne](<https://en.wikipedia.org/wiki/Carcassonne_board_game>) and [Settlers of Catan](https://en.wikipedia.org/wiki/Catan). I'll soon have some other blog posts about the game and some of the technologies and architectures I'm building it with, but today I'm going to walkthrough and illustrate how I used [Dijkstra's Algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) to implement the scoring component of the game. Since there are already [so](https://stackoverflow.com/questions/2856670/why-does-dijkstras-algorithm-work) [many](https://www.youtube.com/watch?v=NHZr6P1csiY) [good](https://www.manning.com/books/grokking-algorithms) [resources](https://mitpress.mit.edu/books/introduction-algorithms) explaining what Dijkstra's algorithm is and how it works, I'm writing this for somebody who already understands the basic concepts involved, and who would like to see a real-life implementation of it in a tile-based Javascript game.
@@ -10,9 +16,9 @@ To begin, I'm going to explain the game, so as to motivate why I even needed a p
 
 Like Carcassonne, the game begins with a single tile on the board. When it is each players' turn, they draw a random tile and must place it somewhere on the board. In order to place the tile, all of its edges must match with those surrounding it. Streets have to match up to streets, and grass has to match up with grass. Tiles can be rotated but not swapped out. So what a player will do on their turn is largely dependent on what tile they draw.
 
-![Placement Example](imgs/placement_both.png)
+![Placement Example](/assets/dijkstra/images/placement_both.png)
 
-![Tile Types](imgs/tiletypes2.png)
+![Tile Types](/assets/dijkstra/images/tiletypes2.png)
 
 ##### Types of Tiles
 
@@ -20,7 +26,7 @@ Tiles can either be a simple road tiles which are used to connect other tiles, o
 
 Players *own* the tiles that they place, including any special tiles. This is indicated (at least right now in this mock-up stage) by little badges with the player's color on the bottom left of the placed tile. (See next image for example.) As tiles are laid and the board expands, paths are formed and eventually completed. Only after a path is completed is it scored, and players receive points based on the value of the tiles that they own.
 
-![Board Example](imgs/completed_path.png)
+![Board Example](/assets/dijkstra/images/completed_path.png)
 
 
 ##### Scoring the Game
@@ -63,7 +69,7 @@ values = {
 
 Now we are coming to the pathfinding. We need to find the optimal valid paths from each mine to each factory that it can possibly supply. The following image shows what we would like our pathfinding algorithm to do. The orange lines are leading from the mines to the factories.
 
-![Score Example](imgs/mines2.png)
+![Score Example](/assets/dijkstra/images/mines2.png)
 
 What's happening, in prose: Yellow owns two mines (``mine2`` and ``mine3``), and each mine has a free path to each of the two factories owned by blue (``factory1`` and ``factory2``). Good for Yellow! The mine on the right (``mine3``) has two valid paths, one of length ``3`` and one of length ``6``. Keeping in mind that this mine has an initial value of ``1`` from the first scoring rule, this means that the new tile value for ``mine3`` is `` 1 + 3 + 6 = 10``. A pretty nice bonus! Similarly, Yellow's mine of the left also has two valid paths to factories, one of length ``3`` and one of length ``4``, bringing this mine tile's total to ``1 + 3 + 4 = 8``.
 
@@ -87,7 +93,7 @@ values = {
 
 After all of the paths from the mines are calculated and scored, the game then moves on to the factories. Remember, only factories which have been supplied by mines are even eligible for shipping their goods to houses. In our example, however, both factories have been supplied, so both will attempt to draw paths to houses on path. Lucky for Blue, they own both of the factories, and with the 2x multiplier, they should expect a big payout. Let's see what happens:
 
-![Factories Score](imgs/factories1.png)
+![Factories Score](/assets/dijkstra/images/factories1.png)
 
 The upper factory (``factory1``) has a nice straight little jot to ``house1`` with a path length of ``3``, making the value of ``factory1`` ``1 + (3*2) = 7``. Unfortunately, Blue didn't choose the best layout, because ``factory1`` is blocking the only possible path from ``factory2`` to ``house1``, and thus misses quite a few points. Better luck next time, Blue!
 
@@ -110,7 +116,7 @@ If it seems that the restriction on movement through other special tiles is frus
 
 A clever layout to maximize points (17 for the factory!):
 
-![Route Around](imgs/routearound.png)
+![Route Around](/assets/dijkstra/images/routearound.png)
 
 So now that I've shown how the game's scoring mechanic relies on a pathfinding algorithm, I'll explain my choice to use Dijkstra's Algorithm over the several other popular shortest path finding algorithms available.
 
@@ -134,13 +140,13 @@ In debating between using A\* and Dijkstra, I opted for Dijkstra because I knew 
 
 ### The Code — Implementation in Javascript
 
-Ok, now that we understand how the game works, what goals we want the algorithm to accomplish, and why I choose Dijkstra's algorithm to accomplish these goals, we can start to look at the code. Everything is written in Javascript (ECMAScript 2016). (Note: Throughout the post, I've hidden a lot of the project-specific implementation details or simplified things in cases where it seemed superfluous or confusing. If you want to see the full code all in one place, you can find it [here](<imgs/pathfinding.js>).)
+Ok, now that we understand how the game works, what goals we want the algorithm to accomplish, and why I choose Dijkstra's algorithm to accomplish these goals, we can start to look at the code. Everything is written in Javascript (ECMAScript 2016). (Note: Throughout the post, I've hidden a lot of the project-specific implementation details or simplified things in cases where it seemed superfluous or confusing. If you want to see the full code all in one place, you can find it [here](</assets/dijkstra/files/pathfinding.js>).)
 
 ###### The ``nodesOnPath`` Object
 
 The first thing to understand is the information the rest of the game provides to the pathfinding/scoring mechanism. Every time a player places a tile and ends their turn, the game checks to see if placed tile is on a completed path. (The specifics of this will be for another blog post.) If that path is completed, the game passes an object containing an array called ``nodesOnPath`` to the scoring mechanism. This array is populated with objects representing each tile on the completed path. A typical ``nodesOnPath`` array looks like this:
 
-```Javascript
+```javascript
 // nodesOnPath - array of tileObjects
 [
   // tileObject
@@ -316,7 +322,7 @@ My implementation, following [Stella Chung](https://hackernoon.com/how-to-implem
 
 Following the [algorithm definition](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Algorithm) on the Wikipedia page, we first create our lists, set the cost of the start node to ``0`` and the unknown costs of the rest of the nodes on the graph to ``Infinity``:
 
-```Javascript
+```javascript
 const getDijkstraTree = function(path, startId) {
   // build a tree of costs and parents from startId
   // to every other node on the path
@@ -345,7 +351,7 @@ const getDijkstraTree = function(path, startId) {
 
 The helper function ``getLowestNode`` on the last line above returns the lowest cost, unprocessed node in the graph. This way, the algorithm is always choosing the optimal node as the next one to process. The first time it is run, it will return the start node, of course, because it is the only non-Infinity node in the ``costs`` object.
 
-```Javascript
+```javascript
 const getLowestNode = function(costs, processed) {
   return Object.keys(costs).reduce((lowest, node) => {
     if (lowest === null || costs[node] < costs[lowest]) {
@@ -404,7 +410,7 @@ Once all the neighbors of the current node have been checked out, we then mark t
 
 Now that we have a calculated tree containing the costs to each node from the start node, we can use it to find the optimal path to each of the end nodes that we are interested in by using ``getOptimalPathFromTree``. We pass it the tree that we calculated in ``getDijkstraTree`` as well as the unique id of the end node that we are interested in finding the optimal path to.
 
-```Javascript
+```javascript
 const getOptimalPathFromTree = function(tree, finishId) {
 
   // return array of actual nodes on the optimal path
